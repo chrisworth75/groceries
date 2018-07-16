@@ -20,15 +20,10 @@ public class Parser {
     private static final Pattern energyPattern = Pattern.compile("([1-9][0-9]+)(kJ)");
     private static final Pattern pricePattern = Pattern.compile("(£)([0-9]+.[0-9]+)(/unit)");
 
-
     public static ResultContainer parse(String url) throws GroceryParseException {
 
         ResultContainer resultContainer = new ResultContainer();
         Document doc = loadDocument(url);
-
-        if (doc == null) {
-            System.exit(1);
-        }
 
         StringBuilder sb = new StringBuilder(url);
 
@@ -44,7 +39,6 @@ public class Parser {
 
             // Get price
             Element priceElement = productElement.select("p.pricePerUnit").first();
-           // String price = priceElement != null ? priceElement.text().trim() : null;
 
             // Fetch Result Page for additional fields
             String productUrl = titleElement.attr("href");
@@ -78,7 +72,6 @@ public class Parser {
                 }
             }
 
-            //BigDecimal price;
             Matcher priceMatcher = pricePattern.matcher(priceElement != null ? priceElement.text() : "");
 
             BigDecimal price = null;
@@ -88,13 +81,12 @@ public class Parser {
                 try {
                     price = new BigDecimal(priceMatcher.group(2));
                 } catch (NumberFormatException e) {
-                    //throw new GroceryParseException(e.getMessage());
-                    return null;
+                    throw new GroceryParseException(e.getMessage());
                 }
             }
-            //
+
             Result result = Result.builder()
-                    .title(titleElement.text())
+                    .title(title)
                     .energy(energy)
                     .price(price)
                     .description(description)
@@ -110,15 +102,19 @@ public class Parser {
         return baseUrl + relativeUrl;
     }
 
-    public static Document loadDocument(String url) {
+    public static Document loadDocument(String url) throws GroceryParseException{
 
-        Document document = null;
-        try {
+        Document document;
+
+        try{
             document = Jsoup.connect(url).get();
         } catch (IOException e) {
-            System.out.println(e.getMessage());
+            throw new GroceryParseException(e.getMessage());
         }
+
+        if (document == null)
+            throw new GroceryParseException("Couldn't parse document");
+
         return document;
     }
-
 }
