@@ -1,5 +1,6 @@
-# groceries
-a command line java app for scraping a portion of the sainsbury's groceries website.
+# About the Groceries App
+This is a command line java app for scraping a portion of the sainsbury's groceries website,
+and calculating the total price of all the products listed, plus the VAT.
 
 # Installing dependencies
 
